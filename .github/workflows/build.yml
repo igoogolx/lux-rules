@@ -1,0 +1,31 @@
+name: Build
+
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - v*.*.*           # Push events to v1.0, v1.1, and v1.9 tags
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.17'
+      - run: make all
+      - run: go run main.go
+
+      - run: tar -cvzf geoData.tar.gz geoData
+      - run: sha256sum geoData.tar.gz > geoData.tar.gz.sha256
+
+      - name: GH Release
+        uses: softprops/action-gh-release@v0.1.13
+        with:
+          files: |
+            geoData.tar.gz
+            geoData.tar.gz.sha256
