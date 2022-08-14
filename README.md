@@ -1,1 +1,1 @@
-# lux-geo-data@v0.0.1
+# lux-geo-data@v0.0.2
