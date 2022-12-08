@@ -6,8 +6,8 @@ define download =
 	if ! mv $$@.unverified $$@; then rm -f $$@.unverified; exit 1; fi
 endef
 
-$(eval $(call download,geoip.dat,https://github.com/Loyalsoldier/v2ray-rules-dat/releases/download/202208132211/geoip.dat,cc64fd248239e216545e3a93b287548560be2dcfff5403edae34c8c3655be204))
-$(eval $(call download,geosite.dat,https://github.com/Loyalsoldier/v2ray-rules-dat/releases/download/202208132211/geosite.dat,7a5c2af16b7ad7298e0d24d15206adcda6c7e5c44ecf8a0a4fa072a14037ae16))
+$(eval $(call download,geoip.dat,https://github.com/Loyalsoldier/v2ray-rules-dat/releases/download/202212072210/geoip.dat,8c58d22cb94bf98a42b1b2dff8ac9c39f42f1e83f52dc1ab016c72e8a22c5fcb))
+$(eval $(call download,geosite.dat,https://github.com/Loyalsoldier/v2ray-rules-dat/releases/download/202212072210/geosite.dat,1c7072652e017abe6c306d83a2a077d2e28f85dab912ee6df96c42c81b98d5ea))
 
 all: clean .deps/geoip/prepared .deps/geosite/prepared
 	$(MAKE) clean
