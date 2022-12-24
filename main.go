@@ -4,7 +4,6 @@ import (
 	"fmt"
 	router "github.com/v2fly/v2ray-core/v5/app/router/routercommon"
 	"google.golang.org/protobuf/proto"
-	"io/ioutil"
 	"log"
 	"net"
 	"os"
@@ -25,7 +24,12 @@ var (
 
 func writeIpFile(filePath string, ips []*router.CIDR) error {
 	f, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
-	defer f.Close()
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+			log.Fatalf("fail to close ip file: %v", filePath)
+		}
+	}(f)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -45,7 +49,12 @@ func writeIpFile(filePath string, ips []*router.CIDR) error {
 
 func writeDomainFile(filePath string, domains []*router.Domain) error {
 	f, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
-	defer f.Close()
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+			log.Fatalf("fail to close domain file: %v", filePath)
+		}
+	}(f)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -78,7 +87,7 @@ func genIpFile(fileName string, countries []string) error {
 }
 
 func LoadGroIpFile(filename string) ([]*router.GeoIP, error) {
-	geoipBytes, err := ioutil.ReadFile(filename)
+	geoipBytes, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open file: %v ", filename)
 	}
@@ -90,7 +99,7 @@ func LoadGroIpFile(filename string) ([]*router.GeoIP, error) {
 }
 
 func genSiteFile(filename string, countries []string) error {
-	geositeBytes, err := ioutil.ReadFile(filename)
+	geositeBytes, err := os.ReadFile(filename)
 	if err != nil {
 		return fmt.Errorf("failed to open file: %v", filename)
 	}
