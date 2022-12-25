@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	geodata "github.com/igoogolx/lux-geo-data/geo-data"
 	router "github.com/v2fly/v2ray-core/v5/app/router/routercommon"
 	"google.golang.org/protobuf/proto"
 	"log"
@@ -69,7 +70,7 @@ func writeDomainFile(filePath string, domains []*router.Domain) error {
 }
 
 func genIpFile(fileName string, countries []string) error {
-	geoList, err := LoadGroIpFile(fileName)
+	geoList, err := geodata.LoadGeoIpFile(fileName)
 	if err != nil {
 		return err
 	}
@@ -84,18 +85,6 @@ func genIpFile(fileName string, countries []string) error {
 		}
 	}
 	return nil
-}
-
-func LoadGroIpFile(filename string) ([]*router.GeoIP, error) {
-	geoipBytes, err := os.ReadFile(filename)
-	if err != nil {
-		return nil, fmt.Errorf("failed to open file: %v ", filename)
-	}
-	var geoipList router.GeoIPList
-	if err := proto.Unmarshal(geoipBytes, &geoipList); err != nil {
-		return nil, err
-	}
-	return geoipList.Entry, nil
 }
 
 func genSiteFile(filename string, countries []string) error {
