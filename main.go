@@ -13,8 +13,7 @@ import (
 )
 
 var (
-	ipDir   = filepath.Join(".", "geoData", "ip")
-	siteDir = filepath.Join(".", "geoData", "site")
+	ruleDir = filepath.Join(".", "rule")
 
 	ipFileName   = "geoip.dat"
 	siteFileName = "geosite.dat"
@@ -23,8 +22,8 @@ var (
 	outSites = []string{"GFW", "CN"}
 )
 
-func writeIpFile(filePath string, ips []*router.CIDR) error {
-	f, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+func writeIpFile(filePath string, ips []*router.CIDR, policy string) error {
+	f, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	defer func(f *os.File) {
 		err := f.Close()
 		if err != nil {
@@ -39,7 +38,7 @@ func writeIpFile(filePath string, ips []*router.CIDR) error {
 			IP:   cidr.Ip,
 			Mask: net.CIDRMask(int(cidr.Prefix), 8*len(cidr.Ip)),
 		}
-		line := ipA.String() + "\n"
+		line := "IP-CIDR," + ipA.String() + "," + policy + "\n"
 		_, err := f.Write([]byte(line))
 		if err != nil {
 			return fmt.Errorf("fail to write ip:%v to %v", line, filePath)
@@ -48,8 +47,8 @@ func writeIpFile(filePath string, ips []*router.CIDR) error {
 	return nil
 }
 
-func writeDomainFile(filePath string, domains []*router.Domain) error {
-	f, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+func writeDomainFile(filePath string, domains []*router.Domain, policy string) error {
+	f, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	defer func(f *os.File) {
 		err := f.Close()
 		if err != nil {
@@ -60,7 +59,7 @@ func writeDomainFile(filePath string, domains []*router.Domain) error {
 		log.Fatal(err)
 	}
 	for _, domain := range domains {
-		line := domain.Value + "/" + strconv.Itoa(int(domain.Type)) + "\n"
+		line := "DOMAIN," + domain.Value + "/" + strconv.Itoa(int(domain.Type)) + "," + policy + "\n"
 		_, err := f.Write([]byte(line))
 		if err != nil {
 			return fmt.Errorf("fail to write domain:%v to %v", line, filePath)
@@ -69,7 +68,7 @@ func writeDomainFile(filePath string, domains []*router.Domain) error {
 	return nil
 }
 
-func genIpFile(fileName string, countries []string) error {
+func genIpFile(fileName string, countries []string, policy string, name string) error {
 	geoList, err := geodata.LoadGeoIpFile(fileName)
 	if err != nil {
 		return err
@@ -77,7 +76,7 @@ func genIpFile(fileName string, countries []string) error {
 	for _, geoData := range geoList {
 		for _, country := range countries {
 			if geoData.CountryCode == country {
-				err := writeIpFile(filepath.Join(ipDir, country), geoData.Cidr)
+				err := writeIpFile(filepath.Join(ruleDir, name), geoData.Cidr, policy)
 				if err != nil {
 					return err
 				}
@@ -87,7 +86,7 @@ func genIpFile(fileName string, countries []string) error {
 	return nil
 }
 
-func genSiteFile(filename string, countries []string) error {
+func genSiteFile(filename string, countries []string, policy string, name string) error {
 	geositeBytes, err := os.ReadFile(filename)
 	if err != nil {
 		return fmt.Errorf("failed to open file: %v", filename)
@@ -100,7 +99,7 @@ func genSiteFile(filename string, countries []string) error {
 	for _, site := range geositeList.Entry {
 		for _, country := range countries {
 			if site.CountryCode == country {
-				err := writeDomainFile(filepath.Join(siteDir, country), site.Domain)
+				err := writeDomainFile(filepath.Join(ruleDir, name), site.Domain, policy)
 				if err != nil {
 					return err
 				}
@@ -115,15 +114,18 @@ func createDirIfNotExist(dir string) {
 	_ = os.MkdirAll(newPath, os.ModePerm)
 }
 
-func main() {
-	createDirIfNotExist(ipDir)
-	createDirIfNotExist(siteDir)
-	err := genIpFile(ipFileName, outIps)
+func createBypassCn() {
+	createDirIfNotExist(ruleDir)
+	err := genIpFile(ipFileName, []string{"PRIVATE", "CN"}, "bypass", "bypass_cn")
 	if err != nil {
 		log.Fatalf("fail to gen geo ip file,error:%v", err)
 	}
-	err = genSiteFile(siteFileName, outSites)
+	err = genSiteFile(siteFileName, []string{"CN"}, "bypass", "bypass_cn")
 	if err != nil {
 		log.Fatalf("fail to gen geo site file,error:%v", err)
 	}
+}
+
+func main() {
+	createBypassCn()
 }
