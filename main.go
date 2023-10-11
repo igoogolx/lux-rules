@@ -13,13 +13,9 @@ import (
 )
 
 var (
-	ruleDir = filepath.Join(".", "rule")
-
+	ruleDir      = filepath.Join(".", "rule")
 	ipFileName   = "geoip.dat"
 	siteFileName = "geosite.dat"
-
-	outIps   = []string{"CN", "PRIVATE"}
-	outSites = []string{"GFW", "CN"}
 )
 
 func writeIpFile(filePath string, ips []*router.CIDR, policy string) error {
@@ -115,7 +111,6 @@ func createDirIfNotExist(dir string) {
 }
 
 func createBypassCn() {
-	createDirIfNotExist(ruleDir)
 	err := genIpFile(ipFileName, []string{"PRIVATE", "CN"}, "bypass", "bypass_cn")
 	if err != nil {
 		log.Fatalf("fail to gen geo ip file,error:%v", err)
@@ -125,7 +120,16 @@ func createBypassCn() {
 		log.Fatalf("fail to gen geo site file,error:%v", err)
 	}
 }
+func createProxyAll() {
+	err := genIpFile(ipFileName, []string{"PRIVATE"}, "bypass", "proxy_all")
+	if err != nil {
+		log.Fatalf("fail to gen geo ip file,error:%v", err)
+	}
+}
 
 func main() {
+	_ = os.RemoveAll(ruleDir)
+	createDirIfNotExist(ruleDir)
+	createProxyAll()
 	createBypassCn()
 }
