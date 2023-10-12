@@ -7,6 +7,7 @@ import (
 	"google.golang.org/protobuf/proto"
 	"log"
 	"net"
+	"net/netip"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -127,9 +128,29 @@ func createProxyAll() {
 	}
 }
 
+func createBypassAll() {
+	err := writeDomainFile(filepath.Join(ruleDir, "bypass_all"), []*router.Domain{
+		{Type: router.Domain_Regex, Value: ".*"},
+	}, "bypass")
+	if err != nil {
+		log.Fatalf("fail to write domain file,error:%v", err)
+	}
+	allAddr, err := netip.ParseAddr("0.0.0.0")
+	if err != nil {
+		log.Fatalf("fail to parse ip,error:%v", err)
+	}
+	err = writeIpFile(filepath.Join(ruleDir, "bypass_all"), []*router.CIDR{
+		{IpAddr: "0.0.0.0", Prefix: 32, Ip: allAddr.AsSlice()},
+	}, "bypass")
+	if err != nil {
+		log.Fatalf("fail to write domain file,error:%v", err)
+	}
+}
+
 func main() {
 	_ = os.RemoveAll(ruleDir)
 	createDirIfNotExist(ruleDir)
 	createProxyAll()
 	createBypassCn()
+	createBypassAll()
 }
