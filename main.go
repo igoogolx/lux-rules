@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	ruleDir      = filepath.Join(".", "rule")
+	ruleDir      = filepath.Join(".", "rules")
 	ipFileName   = "geoip.dat"
 	siteFileName = "geosite.dat"
 )
@@ -147,10 +147,34 @@ func createBypassAll() {
 	}
 }
 
+func createProxyGfw() {
+	err := genSiteFile(siteFileName, []string{"GFW"}, "proxy", "proxy_gfw")
+	if err != nil {
+		log.Fatalf("fail to gen geo site file,error:%v", err)
+	}
+	err = writeDomainFile(filepath.Join(ruleDir, "proxy_gfw"), []*router.Domain{
+		{Type: router.Domain_Regex, Value: ".*"},
+	}, "proxy")
+	if err != nil {
+		log.Fatalf("fail to write domain file,error:%v", err)
+	}
+	allAddr, err := netip.ParseAddr("0.0.0.0")
+	if err != nil {
+		log.Fatalf("fail to parse ip,error:%v", err)
+	}
+	err = writeIpFile(filepath.Join(ruleDir, "proxy_gfw"), []*router.CIDR{
+		{IpAddr: "0.0.0.0", Prefix: 32, Ip: allAddr.AsSlice()},
+	}, "bypass")
+	if err != nil {
+		log.Fatalf("fail to write domain file,error:%v", err)
+	}
+}
+
 func main() {
 	_ = os.RemoveAll(ruleDir)
 	createDirIfNotExist(ruleDir)
 	createProxyAll()
 	createBypassCn()
 	createBypassAll()
+	createProxyGfw()
 }
