@@ -112,24 +112,27 @@ func createDirIfNotExist(dir string) {
 }
 
 func createBypassCn() {
-	err := genIpFile(ipFileName, []string{"PRIVATE", "CN"}, "bypass", "bypass_cn")
+	name := "bypass_cn"
+	err := genIpFile(ipFileName, []string{"PRIVATE", "CN"}, "bypass", name)
 	if err != nil {
 		log.Fatalf("fail to gen geo ip file,error:%v", err)
 	}
-	err = genSiteFile(siteFileName, []string{"CN"}, "bypass", "bypass_cn")
+	err = genSiteFile(siteFileName, []string{"CN"}, "bypass", name)
 	if err != nil {
 		log.Fatalf("fail to gen geo site file,error:%v", err)
 	}
 }
 func createProxyAll() {
-	err := genIpFile(ipFileName, []string{"PRIVATE"}, "bypass", "proxy_all")
+	name := "proxy_all"
+	err := genIpFile(ipFileName, []string{"PRIVATE"}, "bypass", name)
 	if err != nil {
 		log.Fatalf("fail to gen geo ip file,error:%v", err)
 	}
 }
 
 func createBypassAll() {
-	err := writeDomainFile(filepath.Join(ruleDir, "bypass_all"), []*router.Domain{
+	name := "bypass_all"
+	err := writeDomainFile(filepath.Join(ruleDir, name), []*router.Domain{
 		{Type: router.Domain_Regex, Value: ".*"},
 	}, "bypass")
 	if err != nil {
@@ -139,7 +142,7 @@ func createBypassAll() {
 	if err != nil {
 		log.Fatalf("fail to parse ip,error:%v", err)
 	}
-	err = writeIpFile(filepath.Join(ruleDir, "bypass_all"), []*router.CIDR{
+	err = writeIpFile(filepath.Join(ruleDir, name), []*router.CIDR{
 		{IpAddr: "0.0.0.0", Prefix: 32, Ip: allAddr.AsSlice()},
 	}, "bypass")
 	if err != nil {
@@ -148,13 +151,14 @@ func createBypassAll() {
 }
 
 func createProxyGfw() {
-	err := genSiteFile(siteFileName, []string{"GFW"}, "proxy", "proxy_gfw")
+	name := "proxy_gfw"
+	err := genSiteFile(siteFileName, []string{"GFW"}, "proxy", name)
 	if err != nil {
 		log.Fatalf("fail to gen geo site file,error:%v", err)
 	}
-	err = writeDomainFile(filepath.Join(ruleDir, "proxy_gfw"), []*router.Domain{
+	err = writeDomainFile(filepath.Join(ruleDir, name), []*router.Domain{
 		{Type: router.Domain_Regex, Value: ".*"},
-	}, "proxy")
+	}, "bypass")
 	if err != nil {
 		log.Fatalf("fail to write domain file,error:%v", err)
 	}
@@ -162,7 +166,7 @@ func createProxyGfw() {
 	if err != nil {
 		log.Fatalf("fail to parse ip,error:%v", err)
 	}
-	err = writeIpFile(filepath.Join(ruleDir, "proxy_gfw"), []*router.CIDR{
+	err = writeIpFile(filepath.Join(ruleDir, name), []*router.CIDR{
 		{IpAddr: "0.0.0.0", Prefix: 32, Ip: allAddr.AsSlice()},
 	}, "bypass")
 	if err != nil {
