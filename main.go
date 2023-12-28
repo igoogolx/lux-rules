@@ -10,7 +10,6 @@ import (
 	"net/netip"
 	"os"
 	"path/filepath"
-	"strconv"
 )
 
 var (
@@ -18,6 +17,20 @@ var (
 	ipFileName   = "geoip.dat"
 	siteFileName = "geosite.dat"
 )
+
+func getDomainType(rType router.Domain_Type) (string, error) {
+	switch rType {
+	case router.Domain_Plain:
+		return "DOMAIN-KEYWORD", nil
+	case router.Domain_Regex:
+		return "DOMAIN-REGEX", nil
+	case router.Domain_RootDomain:
+		return "DOMAIN-SUFFIX", nil
+	case router.Domain_Full:
+		return "DOMAIN", nil
+	}
+	return "", fmt.Errorf("invalid domain type")
+}
 
 func writeIpFile(filePath string, ips []*router.CIDR, policy string) error {
 	f, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -56,8 +69,12 @@ func writeDomainFile(filePath string, domains []*router.Domain, policy string) e
 		log.Fatal(err)
 	}
 	for _, domain := range domains {
-		line := "DOMAIN," + domain.Value + "/" + strconv.Itoa(int(domain.Type)) + "," + policy + "\n"
-		_, err := f.Write([]byte(line))
+		domainType, err := getDomainType(domain.Type)
+		if err != nil {
+			return err
+		}
+		line := domainType + "," + domain.Value + "," + policy + "\n"
+		_, err = f.Write([]byte(line))
 		if err != nil {
 			return fmt.Errorf("fail to write domain:%v to %v", line, filePath)
 		}
