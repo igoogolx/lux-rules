@@ -18,6 +18,14 @@ var (
 	siteFileName = "geosite.dat"
 )
 
+type Policy string
+
+const (
+	PolicyDirect Policy = "DIRECT"
+	PolicyProxy  Policy = "PROXY"
+	PolicyReject Policy = "REJECT"
+)
+
 func getDomainType(rType router.Domain_Type) (string, error) {
 	switch rType {
 	case router.Domain_Plain:
@@ -32,7 +40,7 @@ func getDomainType(rType router.Domain_Type) (string, error) {
 	return "", fmt.Errorf("invalid domain type")
 }
 
-func writeIpFile(filePath string, ips []*router.CIDR, policy string) error {
+func writeIpFile(filePath string, ips []*router.CIDR, policy Policy) error {
 	f, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	defer func(f *os.File) {
 		err := f.Close()
@@ -48,7 +56,7 @@ func writeIpFile(filePath string, ips []*router.CIDR, policy string) error {
 			IP:   cidr.Ip,
 			Mask: net.CIDRMask(int(cidr.Prefix), 8*len(cidr.Ip)),
 		}
-		line := "IP-CIDR," + ipA.String() + "," + policy + "\n"
+		line := "IP-CIDR," + ipA.String() + "," + string(policy) + "\n"
 		_, err := f.Write([]byte(line))
 		if err != nil {
 			return fmt.Errorf("fail to write ip:%v to %v", line, filePath)
@@ -57,7 +65,7 @@ func writeIpFile(filePath string, ips []*router.CIDR, policy string) error {
 	return nil
 }
 
-func writeDomainFile(filePath string, domains []*router.Domain, policy string) error {
+func writeDomainFile(filePath string, domains []*router.Domain, policy Policy) error {
 	f, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	defer func(f *os.File) {
 		err := f.Close()
@@ -73,7 +81,7 @@ func writeDomainFile(filePath string, domains []*router.Domain, policy string) e
 		if err != nil {
 			return err
 		}
-		line := domainType + "," + domain.Value + "," + policy + "\n"
+		line := domainType + "," + domain.Value + "," + string(policy) + "\n"
 		_, err = f.Write([]byte(line))
 		if err != nil {
 			return fmt.Errorf("fail to write domain:%v to %v", line, filePath)
@@ -82,7 +90,7 @@ func writeDomainFile(filePath string, domains []*router.Domain, policy string) e
 	return nil
 }
 
-func genIpFile(fileName string, countries []string, policy string, name string) error {
+func genIpFile(fileName string, countries []string, policy Policy, name string) error {
 	geoList, err := geodata.LoadGeoIpFile(fileName)
 	if err != nil {
 		return err
@@ -100,7 +108,7 @@ func genIpFile(fileName string, countries []string, policy string, name string) 
 	return nil
 }
 
-func genSiteFile(filename string, countries []string, policy string, name string) error {
+func genSiteFile(filename string, countries []string, policy Policy, name string) error {
 	geositeBytes, err := os.ReadFile(filename)
 	if err != nil {
 		return fmt.Errorf("failed to open file: %v", filename)
@@ -130,18 +138,18 @@ func createDirIfNotExist(dir string) {
 
 func createBypassCn() {
 	name := "bypass_cn"
-	err := genIpFile(ipFileName, []string{"PRIVATE", "CN"}, "bypass", name)
+	err := genIpFile(ipFileName, []string{"PRIVATE", "CN"}, PolicyDirect, name)
 	if err != nil {
 		log.Fatalf("fail to gen geo ip file,error:%v", err)
 	}
-	err = genSiteFile(siteFileName, []string{"CN"}, "bypass", name)
+	err = genSiteFile(siteFileName, []string{"CN"}, PolicyDirect, name)
 	if err != nil {
 		log.Fatalf("fail to gen geo site file,error:%v", err)
 	}
 }
 func createProxyAll() {
 	name := "proxy_all"
-	err := genIpFile(ipFileName, []string{"PRIVATE"}, "bypass", name)
+	err := genIpFile(ipFileName, []string{"PRIVATE"}, PolicyDirect, name)
 	if err != nil {
 		log.Fatalf("fail to gen geo ip file,error:%v", err)
 	}
@@ -151,7 +159,7 @@ func createBypassAll() {
 	name := "bypass_all"
 	err := writeDomainFile(filepath.Join(ruleDir, name), []*router.Domain{
 		{Type: router.Domain_Regex, Value: ".*"},
-	}, "bypass")
+	}, PolicyDirect)
 	if err != nil {
 		log.Fatalf("fail to write domain file,error:%v", err)
 	}
@@ -161,7 +169,7 @@ func createBypassAll() {
 	}
 	err = writeIpFile(filepath.Join(ruleDir, name), []*router.CIDR{
 		{IpAddr: "0.0.0.0", Prefix: 32, Ip: allAddr.AsSlice()},
-	}, "bypass")
+	}, PolicyDirect)
 	if err != nil {
 		log.Fatalf("fail to write domain file,error:%v", err)
 	}
@@ -169,13 +177,13 @@ func createBypassAll() {
 
 func createProxyGfw() {
 	name := "proxy_gfw"
-	err := genSiteFile(siteFileName, []string{"GFW"}, "proxy", name)
+	err := genSiteFile(siteFileName, []string{"GFW"}, PolicyProxy, name)
 	if err != nil {
 		log.Fatalf("fail to gen geo site file,error:%v", err)
 	}
 	err = writeDomainFile(filepath.Join(ruleDir, name), []*router.Domain{
 		{Type: router.Domain_Regex, Value: ".*"},
-	}, "bypass")
+	}, PolicyDirect)
 	if err != nil {
 		log.Fatalf("fail to write domain file,error:%v", err)
 	}
@@ -185,7 +193,7 @@ func createProxyGfw() {
 	}
 	err = writeIpFile(filepath.Join(ruleDir, name), []*router.CIDR{
 		{IpAddr: "0.0.0.0", Prefix: 32, Ip: allAddr.AsSlice()},
-	}, "bypass")
+	}, PolicyDirect)
 	if err != nil {
 		log.Fatalf("fail to write domain file,error:%v", err)
 	}
