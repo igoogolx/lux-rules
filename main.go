@@ -168,7 +168,7 @@ func createBypassAll() {
 		log.Fatalf("fail to parse ip,error:%v", err)
 	}
 	err = writeIpFile(filepath.Join(ruleDir, name), []*router.CIDR{
-		{IpAddr: "0.0.0.0", Prefix: 32, Ip: allAddr.AsSlice()},
+		{IpAddr: "0.0.0.0", Prefix: 0, Ip: allAddr.AsSlice()},
 	}, PolicyDirect)
 	if err != nil {
 		log.Fatalf("fail to write domain file,error:%v", err)
