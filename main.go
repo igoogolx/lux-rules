@@ -18,7 +18,7 @@ import (
 
 var (
 	ruleDir      = filepath.Join(".", "rules")
-	protoRuleDir = filepath.Join(".", "proto-rules")
+	protoRuleDir = filepath.Join(".", "proto")
 	ipFileName   = "geoip.dat"
 	siteFileName = "geosite.dat"
 )
