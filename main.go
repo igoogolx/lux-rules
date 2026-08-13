@@ -2,14 +2,15 @@ package main
 
 import (
 	"fmt"
-	geodata "github.com/igoogolx/lux-geo-data/geo-data"
-	router "github.com/v2fly/v2ray-core/v5/app/router/routercommon"
-	"google.golang.org/protobuf/proto"
 	"log"
 	"net"
 	"net/netip"
 	"os"
 	"path/filepath"
+
+	geodata "github.com/igoogolx/lux-geo-data/geo-data"
+	router "github.com/v2fly/v2ray-core/v5/app/router/routercommon"
+	"google.golang.org/protobuf/proto"
 )
 
 var (
