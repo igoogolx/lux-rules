@@ -241,7 +241,7 @@ func createProtoFiles() {
 		if err != nil {
 			log.Fatalln("Failed to encode rules:", err)
 		}
-		if err := os.WriteFile(filepath.Join(protoRuleDir, info.Name()+".dat"), out, 0644); err != nil {
+		if err := os.WriteFile(filepath.Join(protoRuleDir, info.Name()), out, 0644); err != nil {
 			log.Fatalln("Failed to write rules:", err)
 		}
 
