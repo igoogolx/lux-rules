@@ -2,15 +2,18 @@ package main
 
 import (
 	"fmt"
+	"io/fs"
 	"log"
 	"net"
 	"net/netip"
 	"os"
 	"path/filepath"
 
+	"github.com/golang/protobuf/proto"
+	"github.com/igoogolx/itun2socks/pkg/list"
+	"github.com/igoogolx/itun2socks/pkg/rule_engine"
 	geodata "github.com/igoogolx/lux-geo-data/geo-data"
 	router "github.com/v2fly/v2ray-core/v5/app/router/routercommon"
-	"google.golang.org/protobuf/proto"
 )
 
 var (
@@ -200,6 +203,52 @@ func createProxyGfw() {
 	}
 }
 
+func createProtoFiles() {
+
+	err := filepath.Walk(ruleDir, func(path string, info fs.FileInfo, err error) error {
+
+		if err != nil {
+
+			return err
+		}
+
+		book := &rule_engine.PbBook{}
+
+		fReader, err := os.OpenFile(path, os.O_RDONLY, 0644)
+		if err != nil {
+			return err
+		}
+
+		items, err := list.ParseFile(fReader)
+
+		for _, line := range items {
+			rule, err := rule_engine.ParseRawValue(line)
+			if err == nil {
+				book.Rule = append(book.Rule, &rule_engine.PbRule{
+					RuleType:   string(rule.Type()),
+					Payload:    rule.Value(),
+					RulePolicy: string(rule.GetPolicy()),
+				})
+			}
+		}
+
+		out, err := proto.Marshal(book)
+		if err != nil {
+			log.Fatalln("Failed to encode address book:", err)
+		}
+		if err := os.WriteFile(info.Name()+".dat", out, 0644); err != nil {
+			log.Fatalln("Failed to write address book:", err)
+		}
+
+		return nil
+
+	})
+	if err != nil {
+		return
+	}
+
+}
+
 func main() {
 	_ = os.RemoveAll(ruleDir)
 	createDirIfNotExist(ruleDir)
@@ -207,4 +256,5 @@ func main() {
 	createBypassCn()
 	createBypassAll()
 	createProxyGfw()
+	createProtoFiles()
 }
