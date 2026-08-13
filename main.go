@@ -18,6 +18,7 @@ import (
 
 var (
 	ruleDir      = filepath.Join(".", "rules")
+	protoRuleDir = filepath.Join(".", "proto-rules")
 	ipFileName   = "geoip.dat"
 	siteFileName = "geosite.dat"
 )
@@ -234,10 +235,10 @@ func createProtoFiles() {
 
 		out, err := proto.Marshal(book)
 		if err != nil {
-			log.Fatalln("Failed to encode address book:", err)
+			log.Fatalln("Failed to encode rules:", err)
 		}
-		if err := os.WriteFile(info.Name()+".dat", out, 0644); err != nil {
-			log.Fatalln("Failed to write address book:", err)
+		if err := os.WriteFile(filepath.Join(protoRuleDir, info.Name()+".dat"), out, 0644); err != nil {
+			log.Fatalln("Failed to write rules:", err)
 		}
 
 		return nil
@@ -252,6 +253,8 @@ func createProtoFiles() {
 func main() {
 	_ = os.RemoveAll(ruleDir)
 	createDirIfNotExist(ruleDir)
+	_ = os.RemoveAll(protoRuleDir)
+	createDirIfNotExist(protoRuleDir)
 	createProxyAll()
 	createBypassCn()
 	createBypassAll()

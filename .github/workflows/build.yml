@@ -16,12 +16,14 @@ jobs:
       - name: Setup go
         uses: actions/setup-go@v2
         with:
-          go-version: '1.21'
+          go-version: '1.26'
       - run: make all
       - run: go run main.go
 
       - run: tar -cvzf rules.tar.gz rules
       - run: sha256sum rules.tar.gz > rules.tar.gz.sha256
+      - run: tar -cvzf proto-rules.tar.gz proto-rules
+      - run: sha256sum proto-rules.tar.gz > porto-rules.tar.gz.sha256
 
       - name: GH Release
         uses: softprops/action-gh-release@v0.1.13
@@ -29,3 +31,5 @@ jobs:
           files: |
             rules.tar.gz
             rules.tar.gz.sha256
+            proto-rules.tar.gz
+            proto-rules.tar.gz.sha256
