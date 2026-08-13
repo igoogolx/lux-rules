@@ -29,7 +29,7 @@ require (
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
-	github.com/igoogolx/itun2socks v1.35.2-beat.2 // indirect
+	github.com/igoogolx/itun2socks v1.35.2-beat.3 // indirect
 	github.com/klauspost/compress v1.17.9 // indirect
 	github.com/mdlayher/netlink v1.11.0 // indirect
 	github.com/mdlayher/socket v0.6.0 // indirect

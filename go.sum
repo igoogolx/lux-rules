@@ -50,6 +50,8 @@ github.com/hashicorp/golang-lru/v2 v2.0.7 h1:a+bsQ5rvGLjzHuww6tVxozPZFVghXaHOwFs
 github.com/hashicorp/golang-lru/v2 v2.0.7/go.mod h1:QeFd9opnmA6QUJc5vARoKUSoFhyfM2/ZepoAG6RGpeM=
 github.com/igoogolx/itun2socks v1.35.2-beat.2 h1:EBb8eZvrICpkNDb1+pR6vCadSDDVVRRZVv3AKg7EReg=
 github.com/igoogolx/itun2socks v1.35.2-beat.2/go.mod h1:sbzcI9y5+XLoDux0IedjvdnDZlkVhKdbFKbB92t9uQs=
+github.com/igoogolx/itun2socks v1.35.2-beat.3 h1:jaTfTFoUeDhbzdDB58lM+/A7HxVKb2vhksbNeL4smxc=
+github.com/igoogolx/itun2socks v1.35.2-beat.3/go.mod h1:sbzcI9y5+XLoDux0IedjvdnDZlkVhKdbFKbB92t9uQs=
 github.com/klauspost/compress v1.17.9 h1:6KIumPrER1LHsvBVuDa0r5xaG0Es51mhhB9BQB2qeMA=
 github.com/klauspost/compress v1.17.9/go.mod h1:Di0epgTjJY877eYKx5yC51cX2A2Vl2ibi7bDH9ttBbw=
 github.com/mdlayher/netlink v1.11.0 h1:Cot7ixQZL6P/pxRFB4z3jRdGPYeZosFT+WHS3sMXy8Y=
