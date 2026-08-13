@@ -213,6 +213,10 @@ func createProtoFiles() {
 			return err
 		}
 
+		if info.IsDir() {
+			return nil
+		}
+
 		book := &rule_engine.PbBook{}
 
 		fReader, err := os.OpenFile(path, os.O_RDONLY, 0644)
