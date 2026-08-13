@@ -28,6 +28,7 @@ jobs:
       - name: GH Release
         uses: softprops/action-gh-release@v0.1.13
         with:
+          prerelease: ${{ contains(github.ref, '-beat.') }}
           files: |
             rules.tar.gz
             rules.tar.gz.sha256
