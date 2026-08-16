@@ -12,11 +12,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
       - name: Setup go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v6
         with:
-          go-version: '1.21'
+          go-version: '1.26.5'
       - run: make all
       - run: go run main.go
 
@@ -24,7 +24,7 @@ jobs:
       - run: sha256sum rules.tar.gz > rules.tar.gz.sha256
 
       - name: GH Release
-        uses: softprops/action-gh-release@v0.1.13
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             rules.tar.gz
