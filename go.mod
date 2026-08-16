@@ -1,6 +1,6 @@
 module github.com/igoogolx/lux-geo-data
 
-go 1.19
+go 1.26
 
 require (
 	github.com/v2fly/v2ray-core/v5 v5.1.0
